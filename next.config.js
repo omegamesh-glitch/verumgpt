@@ -8,7 +8,6 @@ const withPWA = require('next-pwa')({
   cacheOnFrontEndNav: false, // Disable cache on navigation for faster updates
   // Otimizações de cache PWA
   sw: 'sw.js',
-  swcMinify: true,
   reloadOnOnline: true,
   // Runtime caching otimizado
   runtimeCaching: [
@@ -61,11 +60,12 @@ const nextConfig = {
   compress: true, // Enable gzip compression
   output: 'standalone', // Enable standalone output for Railway/Docker
   poweredByHeader: false, // Remove X-Powered-By header for security
+  // Server external packages (movido de experimental no Next.js 15)
+  serverExternalPackages: ['pdf-parse'],
   experimental: {
     serverActions: {
       bodySizeLimit: '10mb',
     },
-    optimizeCss: true, // Optimize CSS
     optimizePackageImports: [
       'lucide-react', 
       '@radix-ui/react-icons',
@@ -74,14 +74,6 @@ const nextConfig = {
       'framer-motion',
       'react-markdown',
     ], // Tree-shake unused imports
-    // Otimizações para Bare Metal (mais recursos disponíveis)
-    serverComponentsExternalPackages: ['pdf-parse'],
-    // Usar mais workers para Bare Metal (CPUs mais poderosas)
-    workerThreads: true,
-    cpus: 4, // Aproveitar múltiplos cores do Bare Metal
-    // Otimizações adicionais
-    optimizeServerReact: true,
-    serverMinification: true,
   },
   env: {
     OPENAI_API_KEY: process.env.OPENAI_API_KEY || '',
@@ -164,89 +156,9 @@ const nextConfig = {
       },
     ]
   },
-  // Reduce bundle size e otimizações avançadas
-  webpack: (config, { isServer, webpack, dev }) => {
-    if (!isServer) {
-      // Reduce bundle size for client
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        fs: false,
-        net: false,
-        tls: false,
-      }
-      
-      // Tree shaking e otimizações de produção
-      if (!dev) {
-        config.optimization = {
-          ...config.optimization,
-          usedExports: true,
-          sideEffects: false,
-          // Code splitting otimizado
-          splitChunks: {
-            chunks: 'all',
-            cacheGroups: {
-              default: false,
-              vendors: false,
-              // Vendor chunks separados para melhor cache
-              framework: {
-                name: 'framework',
-                chunks: 'all',
-                test: /(?<!node_modules.*)[\\/]node_modules[\\/](react|react-dom|scheduler|prop-types|use-subscription)[\\/]/,
-                priority: 40,
-                enforce: true,
-              },
-              lib: {
-                test(module) {
-                  return module.size() > 160000 && /node_modules[/\\]/.test(module.identifier())
-                },
-                name(module) {
-                  const hash = require('crypto').createHash('sha1')
-                  hash.update(module.identifier())
-                  return hash.digest('hex').substring(0, 8)
-                },
-                priority: 30,
-                minChunks: 1,
-                reuseExistingChunk: true,
-              },
-              commons: {
-                name: 'commons',
-                minChunks: 2,
-                priority: 20,
-              },
-              shared: {
-                name(module, chunks) {
-                  return require('crypto')
-                    .createHash('sha1')
-                    .update(chunks.reduce((acc, chunk) => acc + chunk.name, ''))
-                    .digest('hex')
-                    .substring(0, 8)
-                },
-                priority: 10,
-                minChunks: 2,
-                reuseExistingChunk: true,
-              },
-            },
-          },
-        }
-      }
-    }
-    
-    // Ignore unnecessary files
-    config.plugins.push(
-      new webpack.IgnorePlugin({
-        resourceRegExp: /^\.\/locale$/,
-        contextRegExp: /moment$/,
-      })
-    )
-    
-    return config
-  },
   
   // Otimizações de produção
-  swcMinify: true, // Usar SWC minifier (mais rápido que Terser)
-  
-  // Otimizar fontes
-  optimizeFonts: true,
+  swcMinify: true, // Usar SWC minifier (mais rápido que Terser) - já é padrão no Next.js 15
 }
 
 module.exports = withPWA(nextConfig)
