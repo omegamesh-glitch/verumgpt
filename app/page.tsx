@@ -357,10 +357,20 @@ export default function ChatPage() {
       const formData = new FormData()
       formData.append('audio', audioBlob, 'recording.webm')
       
-      const response = await fetch('/api/speech-to-text', {
+      // Try ElevenLabs first (better quality), fallback to OpenAI Whisper
+      let response = await fetch('/api/elevenlabs-speech-to-text', {
         method: 'POST',
         body: formData,
       })
+      
+      // Fallback to OpenAI Whisper if ElevenLabs fails
+      if (!response.ok) {
+        console.log('🔄 ElevenLabs STT failed, trying OpenAI Whisper...')
+        response = await fetch('/api/speech-to-text', {
+          method: 'POST',
+          body: formData,
+        })
+      }
       
       if (!response.ok) {
         throw new Error('Erro na transcrição')

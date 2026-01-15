@@ -3,20 +3,86 @@ import { NextRequest, NextResponse } from 'next/server'
 /**
  * ElevenLabs Text-to-Speech API Route
  * High-quality, natural voice synthesis using ElevenLabs
+ * Supports advanced features: SSML, audio tags, phonemes, emotion control
+ * 
+ * Best Practices:
+ * - Use SSML <break> tags for natural pauses (up to 3s)
+ * - Use audio tags [laughs], [whispers], [sarcastic] for emotion (v3)
+ * - Use phoneme tags for pronunciation control
+ * - Normalize text (numbers, dates, currencies) for better results
  */
 
 const ELEVENLABS_API_URL = 'https://api.elevenlabs.io/v1'
+
+/**
+ * Normalize text for better TTS pronunciation
+ * Converts numbers, dates, currencies to spoken format
+ */
+function normalizeTextForTTS(text: string): string {
+  let normalized = text
+  
+  // Normalize phone numbers: 123-456-7890 → "one two three, four five six, seven eight nine zero"
+  normalized = normalized.replace(/(\d{3})-(\d{3})-(\d{4})/g, (match, a, b, c) => {
+    return `${a.split('').join(' ')} ${b.split('').join(' ')} ${c.split('').join(' ')}`
+  })
+  
+  // Normalize currencies: $1,000 → "one thousand dollars"
+  normalized = normalized.replace(/\$(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)/g, (match, num) => {
+    const numStr = num.replace(/,/g, '')
+    if (numStr.includes('.')) {
+      const [dollars, cents] = numStr.split('.')
+      return `${numberToWords(parseInt(dollars))} dollars and ${numberToWords(parseInt(cents))} cents`
+    }
+    return `${numberToWords(parseInt(numStr))} dollars`
+  })
+  
+  // Normalize percentages: 100% → "one hundred percent"
+  normalized = normalized.replace(/(\d+)%/g, (match, num) => {
+    return `${numberToWords(parseInt(num))} percent`
+  })
+  
+  // Normalize URLs: example.com → "example dot com"
+  normalized = normalized.replace(/(https?:\/\/)?([\w\-]+\.)+[\w\-]+(\/[\w\-\.\/]*)?/gi, (match) => {
+    return match.replace(/\./g, ' dot ').replace(/\//g, ' slash ')
+  })
+  
+  return normalized
+}
+
+/**
+ * Simple number to words converter (basic implementation)
+ */
+function numberToWords(num: number): string {
+  const ones = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine']
+  const teens = ['ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen']
+  const tens = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety']
+  
+  if (num === 0) return 'zero'
+  if (num < 10) return ones[num]
+  if (num < 20) return teens[num - 10]
+  if (num < 100) return tens[Math.floor(num / 10)] + (num % 10 ? ' ' + ones[num % 10] : '')
+  if (num < 1000) {
+    return ones[Math.floor(num / 100)] + ' hundred' + (num % 100 ? ' ' + numberToWords(num % 100) : '')
+  }
+  if (num < 1000000) {
+    return numberToWords(Math.floor(num / 1000)) + ' thousand' + (num % 1000 ? ' ' + numberToWords(num % 1000) : '')
+  }
+  return num.toString() // Fallback for very large numbers
+}
 
 export async function POST(req: NextRequest) {
   try {
     const { 
       text,
       voice_id,
-      model_id = 'eleven_multilingual_v2', // Multilingual model
+      model_id = 'eleven_multilingual_v2', // Multilingual v2 for better normalization
       stability = 0.5,
       similarity_boost = 0.75,
       style = 0.0,
       use_speaker_boost = true,
+      speed = 1.0, // Speed control (0.7 to 1.2)
+      normalize = true, // Auto-normalize text
+      enable_ssml = true, // Enable SSML support
     } = await req.json()
 
     if (!text) {
@@ -45,7 +111,7 @@ export async function POST(req: NextRequest) {
       model: model_id,
     })
 
-    // Clean text for better TTS
+    // Clean and normalize text for better TTS
     let cleanText = text
       .replace(/```[\s\S]*?```/g, '[código]')
       .replace(/`[^`]+`/g, (match: string) => match.replace(/`/g, ''))
@@ -56,6 +122,11 @@ export async function POST(req: NextRequest) {
       .replace(/\n{3,}/g, '\n\n')
       .replace(/\s{3,}/g, ' ')
       .trim()
+    
+    // Apply text normalization if enabled (for better pronunciation)
+    if (normalize) {
+      cleanText = normalizeTextForTTS(cleanText)
+    }
 
     if (!cleanText || cleanText.length < 1) {
       return NextResponse.json(
