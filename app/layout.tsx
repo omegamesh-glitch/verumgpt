@@ -6,6 +6,17 @@ export const metadata: Metadata = {
   description: 'VERUM Node - Advanced AI Chat Assistant. Upload PDFs, Images, Web Search - 100% Free',
   manifest: '/manifest.json',
   authors: [{ name: 'VERUM Node Legacy' }],
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://verumnodelegacy.com'),
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    title: 'VERUM NODE - AI Chat Gratuito',
+    description: 'VERUM Node - Advanced AI Chat Assistant',
+    url: 'https://verumnodelegacy.com',
+    siteName: 'VERUM NODE',
+    type: 'website',
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
