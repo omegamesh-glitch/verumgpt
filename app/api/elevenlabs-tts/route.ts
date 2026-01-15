@@ -94,7 +94,7 @@ export async function POST(req: NextRequest) {
 
     // Get API key from environment
     const apiKey = process.env.ELEVENLABS_API_KEY
-    const defaultVoiceId = process.env.ELEVENLABS_VOICE_ID || '6edcf137fb406f20fe21f01df2d3604a164f52a3a1d709b2ffdbd7f99a1daf60'
+    const defaultVoiceId = process.env.ELEVENLABS_VOICE_ID || '56bWURjYFHyYyVf490Dp'
     
     if (!apiKey) {
       return NextResponse.json(

@@ -233,7 +233,7 @@ const data = await response.json()
 
 ```bash
 ELEVENLABS_API_KEY=sk_f0ba1f46998baed7192801241289fbefa3247564fb055f65
-ELEVENLABS_VOICE_ID=6edcf137fb406f20fe21f01df2d3604a164f52a3a1d709b2ffdbd7f99a1daf60
+ELEVENLABS_VOICE_ID=56bWURjYFHyYyVf490Dp
 ```
 
 **Status**: ✅ Configuradas no Railway
