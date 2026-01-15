@@ -1,16 +1,25 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useMemo, useCallback } from 'react'
 import { Send, Loader2, Sparkles, FileText, X, Search, Settings as SettingsIcon, Image as ImageIcon, Mic, MicOff } from 'lucide-react'
 import { useDropzone } from 'react-dropzone'
 import dynamic from 'next/dynamic'
 import ChatMessage from './components/ChatMessage'
 import Footer from './components/Footer'
 
-// Lazy load heavy components
-const PWAInstallPrompt = dynamic(() => import('./components/PWAInstallPrompt'), { ssr: false })
-const SettingsModal = dynamic(() => import('./components/SettingsModal'), { ssr: false })
-const HybridProcessingIndicator = dynamic(() => import('./components/HybridProcessingIndicator'), { ssr: false })
+// Lazy load heavy components com loading states otimizados
+const PWAInstallPrompt = dynamic(() => import('./components/PWAInstallPrompt'), { 
+  ssr: false,
+  loading: () => null, // Não mostrar loading para PWA prompt
+})
+const SettingsModal = dynamic(() => import('./components/SettingsModal'), { 
+  ssr: false,
+  loading: () => null, // Modal só aparece quando necessário
+})
+const HybridProcessingIndicator = dynamic(() => import('./components/HybridProcessingIndicator'), { 
+  ssr: false,
+  loading: () => null,
+})
 
 interface Message {
   id: string
