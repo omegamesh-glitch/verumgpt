@@ -13,6 +13,10 @@
     "healthcheckTimeout": 100,
     "healthcheckInterval": 30,
     "sleepApplication": false,
-    "numReplicas": 1
+    "numReplicas": 2,
+    "resources": {
+      "memory": 8192,
+      "cpu": 4
+    }
   }
 }
