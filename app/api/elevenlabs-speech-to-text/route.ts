@@ -178,12 +178,11 @@ export async function POST(req: NextRequest) {
       queryParams.append('timestamps_granularity', timestampsGranularity)
     }
     // Add keyterms if provided (up to 100, max 50 chars each)
+    // Keyterms should be passed as query parameter (comma-separated or JSON array)
     if (keyterms.length > 0) {
-      // Keyterms are passed as JSON array in the request body, not query params
-      // We'll add them to the FormData instead
-      keyterms.forEach((keyterm, index) => {
-        elevenLabsFormData.append(`keyterms[${index}]`, keyterm)
-      })
+      // ElevenLabs accepts keyterms as query parameter
+      // Format: keyterms=term1,term2,term3 or keyterms=["term1","term2"]
+      queryParams.append('keyterms', JSON.stringify(keyterms))
     }
 
     // ElevenLabs Speech-to-Text API call
