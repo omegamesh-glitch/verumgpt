@@ -8,6 +8,8 @@ import { NextRequest, NextResponse } from 'next/server'
  * - Language detection (auto or manual)
  * - Speaker diarization (who is speaking)
  * - Audio event tagging (laughter, applause, etc.)
+ * - Multichannel support (up to 5 channels)
+ * - Keyterm prompting (up to 100 keyterms for better accuracy)
  * - High accuracy transcription
  */
 
@@ -116,6 +118,24 @@ export async function POST(req: NextRequest) {
     // If multichannel is enabled, diarize must be false
     const diarize = useMultiChannel ? false : (formData.get('diarize') === 'true' || formData.get('diarize') === true)
     const timestampsGranularity = formData.get('timestamps_granularity') as string || 'word' // word, sentence, paragraph
+    
+    // Keyterm prompting (up to 100 keyterms, max 50 chars each)
+    // Can be passed as JSON array string or comma-separated string
+    let keyterms: string[] = []
+    const keytermsParam = formData.get('keyterms')
+    if (keytermsParam) {
+      if (typeof keytermsParam === 'string') {
+        try {
+          // Try parsing as JSON array
+          keyterms = JSON.parse(keytermsParam)
+        } catch {
+          // If not JSON, treat as comma-separated string
+          keyterms = keytermsParam.split(',').map(k => k.trim()).filter(k => k.length > 0 && k.length <= 50)
+        }
+      }
+    }
+    // Limit to 100 keyterms and 50 chars each
+    keyterms = keyterms.slice(0, 100).map(k => k.substring(0, 50))
 
     console.log('🎤 [ElevenLabs STT] Transcribing audio...', {
       filename: audioFile.name,
@@ -127,6 +147,7 @@ export async function POST(req: NextRequest) {
       diarize: diarize,
       multichannel: useMultiChannel,
       timestamps: timestampsGranularity,
+      keyterms: keyterms.length > 0 ? `${keyterms.length} keyterms` : 'none',
     })
 
     // Convert File to Buffer/Blob for ElevenLabs API
@@ -155,6 +176,14 @@ export async function POST(req: NextRequest) {
     }
     if (timestampsGranularity) {
       queryParams.append('timestamps_granularity', timestampsGranularity)
+    }
+    // Add keyterms if provided (up to 100, max 50 chars each)
+    if (keyterms.length > 0) {
+      // Keyterms are passed as JSON array in the request body, not query params
+      // We'll add them to the FormData instead
+      keyterms.forEach((keyterm, index) => {
+        elevenLabsFormData.append(`keyterms[${index}]`, keyterm)
+      })
     }
 
     // ElevenLabs Speech-to-Text API call

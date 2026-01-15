@@ -198,17 +198,39 @@ export async function POST(req: NextRequest) {
 
     const audioBuffer = await response.arrayBuffer()
     
+    // Extract metadata from response headers
+    const characterCount = response.headers.get('x-character-count')
+    const requestId = response.headers.get('request-id')
+    const modelId = response.headers.get('x-model-id') || model_id
+    
     console.log('✅ [ElevenLabs TTS] Speech generated successfully', {
       size: `${(audioBuffer.byteLength / 1024).toFixed(2)}KB`,
+      characters: characterCount || 'unknown',
+      requestId: requestId || 'unknown',
+      model: modelId,
     })
 
+    // Build response headers with metadata
+    const responseHeaders: Record<string, string> = {
+      'Content-Type': 'audio/mpeg',
+      'Cache-Control': 'public, max-age=86400', // Cache for 24 hours
+      'Content-Length': audioBuffer.byteLength.toString(),
+      'X-Provider': 'elevenlabs',
+    }
+    
+    // Add cost tracking headers if available
+    if (characterCount) {
+      responseHeaders['X-Character-Count'] = characterCount
+    }
+    if (requestId) {
+      responseHeaders['X-Request-ID'] = requestId
+    }
+    if (modelId) {
+      responseHeaders['X-Model-ID'] = modelId
+    }
+
     return new NextResponse(audioBuffer, {
-      headers: {
-        'Content-Type': 'audio/mpeg',
-        'Cache-Control': 'public, max-age=86400', // Cache for 24 hours
-        'Content-Length': audioBuffer.byteLength.toString(),
-        'X-Provider': 'elevenlabs',
-      },
+      headers: responseHeaders,
     })
   } catch (error: any) {
     // SECURITY: Never expose API keys in error messages
