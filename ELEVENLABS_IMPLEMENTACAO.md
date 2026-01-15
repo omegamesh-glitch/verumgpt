@@ -20,7 +20,7 @@ const response = await fetch('/api/elevenlabs-tts', {
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
     text: 'Hello, world!',
-    voice_id: '6edcf137fb406f20fe21f01df2d3604a164f52a3a1d709b2ffdbd7f99a1daf60',
+    voice_id: 'd7361a8e96f033e1ebff51d4a32e24cda3b4a265fdd6b3c69602f9ab411f3f32',
     model_id: 'eleven_multilingual_v2',
     stability: 0.5,
     similarity_boost: 0.75,
@@ -232,8 +232,8 @@ const data = await response.json()
 ## 📋 Variáveis de Ambiente
 
 ```bash
-ELEVENLABS_API_KEY=sk_f0ba1f46998baed7192801241289fbefa3247564fb055f65
-ELEVENLABS_VOICE_ID=56bWURjYFHyYyVf490Dp
+ELEVENLABS_API_KEY=sk_1a84e0714602951b58274b8513160556d51a0d99e877baca
+ELEVENLABS_VOICE_ID=d7361a8e96f033e1ebff51d4a32e24cda3b4a265fdd6b3c69602f9ab411f3f32
 ```
 
 **Status**: ✅ Configuradas no Railway
