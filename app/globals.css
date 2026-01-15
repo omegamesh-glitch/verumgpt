@@ -1,0 +1,137 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Lightweight animations - using transform for better performance */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Use will-change for smoother animations */
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s ease-out;
+}
+
+/* Pulse animation for recording indicator */
+@keyframes ping {
+  75%, 100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+.animate-ping {
+  animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+:root {
+  --verum-primary: #10a37f;
+  --verum-secondary: #1a7f64;
+  --verum-gradient-start: #10a37f;
+  --verum-gradient-middle: #0d8f6e;
+  --verum-gradient-end: #1a7f64;
+  --verum-accent: #14b8a6;
+  --verum-dark: #0f766e;
+  --verum-glow: rgba(16, 163, 127, 0.3);
+  --verum-glass: rgba(255, 255, 255, 0.05);
+}
+
+.dark {
+  --verum-primary: #14b8a6;
+  --verum-secondary: #0d9488;
+  --verum-gradient-start: #14b8a6;
+  --verum-gradient-middle: #0d9488;
+  --verum-gradient-end: #0f766e;
+  --verum-accent: #2dd4bf;
+  --verum-dark: #134e4a;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  @apply bg-[#0a0a0a] text-gray-100;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Inter', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.01em;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Glass morphism effect */
+.glass {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Glow effect */
+.glow {
+  box-shadow: 0 0 20px var(--verum-glow);
+}
+
+.glow-hover:hover {
+  box-shadow: 0 0 30px var(--verum-glow);
+  transition: box-shadow 0.3s ease;
+}
+
+/* Minimalist scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #e5e7eb;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #d1d5db;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #4b5563;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
