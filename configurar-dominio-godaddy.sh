@@ -14,11 +14,19 @@ if railway status | grep -q "Service: None"; then
     echo ""
 fi
 
-echo "📝 Adicionando domínio customizado no Railway..."
+echo "📝 Para adicionar domínio customizado no Railway:"
 echo ""
-
-# Adicionar domínio customizado
-railway domain add verumnodelegacy.com 2>&1
+echo "OPÇÃO 1 - Via Dashboard (Recomendado):"
+echo "1. Acesse: https://railway.com/project/cf27bf87-3c4c-4f78-bf84-255018c4658e"
+echo "2. Clique no serviço 'zestful-eagerness'"
+echo "3. Vá em Settings → Networking → Custom Domains"
+echo "4. Clique em 'Add Domain' ou 'Generate Domain'"
+echo "5. Digite: verumnodelegacy.com"
+echo "6. Railway vai gerar um CNAME (ex: xxxxxx.railway.app)"
+echo ""
+echo "OPÇÃO 2 - Via CLI:"
+echo "railway domain generate verumnodelegacy.com"
+echo ""
 
 echo ""
 echo "✅ Domínio adicionado no Railway!"
